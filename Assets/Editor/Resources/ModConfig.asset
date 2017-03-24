@@ -13,5 +13,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: neutralization
   title: Neutralization
-  version: 1.0
+  version: 1.1
   outputFolder: build

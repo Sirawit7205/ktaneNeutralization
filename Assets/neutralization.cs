@@ -10,6 +10,7 @@ public class neutralization : MonoBehaviour {
 
     public KMAudio Audio;
     public KMBombInfo Info;
+    public KMBombModule Module;
     public KMSelectable[] btn;
     public MeshRenderer liquid, filterBtn;
     public GameObject liquidControl;
@@ -207,12 +208,14 @@ public class neutralization : MonoBehaviour {
         {
             liquid.GetComponent<MeshRenderer>().material.color = Color.white;
             Debug.LogFormat("[Neutralization #{0}] Answer correct! Module passed!", _moduleId);
-            GetComponent<KMBombModule>().HandlePass();
+            Audio.PlaySoundAtTransform("correct", Module.transform);
+            Module.HandlePass();
         }
         else
         {
             Debug.LogFormat("[Neutralization #{0}] Answer incorrect! Strike!", _moduleId);
-            GetComponent<KMBombModule>().HandleStrike();
+            Audio.PlaySoundAtTransform("strike", Module.transform);
+            Module.HandleStrike();
         }
     }
 }
