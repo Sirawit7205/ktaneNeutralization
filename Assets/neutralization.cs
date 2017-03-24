@@ -19,10 +19,10 @@ public class neutralization : MonoBehaviour {
     private int _selectBase = 0, _selectVol = 0, acidVol, acidType, acidConc, baseVol, baseType, baseConc;
     private bool filterMode = false, soluType;
     private bool[,] solubility = new bool[4, 4] {
-        {true,false,true,false},
-        {true,true,false,true},
-        {false,true,true,false},
-        {false,false,false,true},
+        {true,true,false,false},
+        {true,false,true,true},
+        {false,true,false,true},
+        {false,false,true,false},
     };
 
     void Start () {
@@ -91,8 +91,6 @@ public class neutralization : MonoBehaviour {
 
     void prepareAcid()
     {
-        GameObject liquidScale = GameObject.Find("liquidControl");
-
         acidType = Random.Range(0, 4);
         acidVol = Random.Range(1, 5) * 5;
 
@@ -101,18 +99,20 @@ public class neutralization : MonoBehaviour {
         else if (acidType == 2) liquid.GetComponent<MeshRenderer>().material.color = Color.red;
         else liquid.GetComponent<MeshRenderer>().material.color = Color.blue;
 
-        if(acidVol == 5) liquidScale.gameObject.transform.localScale = new Vector3(22.22222f, 50, 1.43f);
-        else if(acidVol == 10) liquidScale.gameObject.transform.localScale = new Vector3(22.22222f, 50, 3.73f);
-        else if(acidVol == 15) liquidScale.gameObject.transform.localScale = new Vector3(22.22222f, 50, 6.12f);
-        else liquidScale.gameObject.transform.localScale = new Vector3(22.22222f, 50, 8.44f);
+        if(acidVol == 5) liquidControl.gameObject.transform.localScale = new Vector3(22.22222f, 50, 1.43f);
+        else if(acidVol == 10) liquidControl.gameObject.transform.localScale = new Vector3(22.22222f, 50, 3.73f);
+        else if(acidVol == 15) liquidControl.gameObject.transform.localScale = new Vector3(22.22222f, 50, 6.12f);
+        else liquidControl.gameObject.transform.localScale = new Vector3(22.22222f, 50, 8.44f);
     }
 
     void prepareBase()
     {
+        string temp = string.Join("", Info.GetIndicators().ToArray());
+
         if (Info.IsIndicatorPresent(KMBombInfoExtensions.KnownIndicatorLabel.NSA) && Info.GetBatteryCount() == 3) baseType = 0;
         else if (Info.IsIndicatorOn(KMBombInfoExtensions.KnownIndicatorLabel.CAR) || Info.IsIndicatorOn(KMBombInfoExtensions.KnownIndicatorLabel.FRQ) || Info.IsIndicatorOn(KMBombInfoExtensions.KnownIndicatorLabel.IND)) baseType = 3;
         else if (Info.GetPortCount() == 0 && Info.GetSerialNumberLetters().Any("AEIOU".Contains)) baseType = 1;
-        else if (Info.GetIndicators().Any(_acidForm[acidType].ToUpper().Contains)) baseType = 3;
+        else if (temp.Any(_acidForm[acidType].ToUpper().Contains)) baseType = 3;
         else if (Info.GetBatteryCount(KMBombInfoExtensions.KnownBatteryType.D) > Info.GetBatteryCount(KMBombInfoExtensions.KnownBatteryType.AA)) baseType = 0;
         else if (acidType == 0 || acidType == 1) baseType = 2;
         else baseType = 1;
@@ -122,6 +122,7 @@ public class neutralization : MonoBehaviour {
     {
         int[] anion = { 9, 17, 35, 53 }, cation = { 1, 3, 11, 19 };
         bool[] acidV = { false, false, false, true }, baseV = { false, true, true, true };
+        int bh = Info.GetBatteryHolderCount(), port = Info.GetPorts().Distinct().Count(), indc = Info.GetIndicators().Count();
 
         acidConc = anion[acidType];
         if (acidV[acidType] || baseV[baseType]) acidConc *= 2;
@@ -130,9 +131,11 @@ public class neutralization : MonoBehaviour {
         if (acidConc % 2 == 1) acidConc--;
         if (acidConc == 0) acidConc = 6;
 
-        if (Info.GetBatteryHolderCount() > Info.GetPorts().Distinct().Count()) baseConc = 5;
-        else if (Info.GetBatteryHolderCount() < Info.GetPorts().Distinct().Count()) baseConc = 10;
-        else baseConc = 20;
+        if ((acidType == 3 && baseType == 3) || (acidType == 1 && baseType == 0)) baseConc = 20;
+        else if (bh > port && bh > indc) baseConc = 5;
+        else if (port > bh && port > indc) baseConc = 10;
+        else if (indc > bh && indc > port) baseConc = 20;
+        else baseConc = 5;
     }
 
     void baseTypeAdjust(int m)

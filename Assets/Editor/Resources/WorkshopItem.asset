@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cf2299c8864afe4ab42466f546ae20d, type: 3}
+  m_Name: WorkshopItem
+  m_EditorClassIdentifier: 
+  WorkshopPublishedFileID: 0
+  Title: Neutralization
+  Description: 'The rules are simple: neutralize or be neutralized.
+
+
+    Module idea by Nanthelas.'
+  PreviewImage: {fileID: 2800000, guid: 55bde79c6c818c64f8d744e7c09af628, type: 3}
+  Tags:
+  - Regular Module
