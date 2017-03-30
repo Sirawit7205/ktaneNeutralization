@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using KMHelper;
 using System.Linq;
 
@@ -77,6 +76,8 @@ public class neutralization : MonoBehaviour {
 
     void Init()
     {
+        string[] clrName = { "Yellow", "Green", "Red", "Blue" };
+
         prepareAcid();
         prepareBase();
         prepareConc();
@@ -85,7 +86,7 @@ public class neutralization : MonoBehaviour {
         baseVol *= (acidVol * acidConc) / 10;
         soluType = solubility[acidType,baseType];
 
-        Debug.LogFormat("[Neutralization #{0}] Acid type: {1}, Acid vol: {2}, Acid conc: {3}", _moduleId, _acidForm[acidType], acidVol, acidConc / 10f);
+        Debug.LogFormat("[Neutralization #{0}] Acid color: {1}, Acid type: {2}, Acid vol: {3}, Acid conc: {4}", _moduleId, clrName[acidType],_acidForm[acidType], acidVol, acidConc / 10f);
         Debug.LogFormat("[Neutralization #{0}] Base type: {1}, Base conc: {2}", _moduleId, _baseForm[baseType], baseConc);
         Debug.LogFormat("[Neutralization #{0}] Drop count: {1}, Filter enable: {2}", _moduleId, baseVol, soluType);
     }
@@ -122,7 +123,7 @@ public class neutralization : MonoBehaviour {
     void prepareConc()
     {
         int[] anion = { 9, 17, 35, 53 }, cation = { 1, 3, 11, 19 };
-        bool[] acidV = { false, false, false, true }, baseV = { false, true, true, true };
+        bool[] acidV = { false, false, false, true }, baseV = { false, true, true, false };
         int bh = Info.GetBatteryHolderCount(), port = Info.GetPorts().Distinct().Count(), indc = Info.GetIndicators().Count();
 
         acidConc = anion[acidType];
@@ -201,8 +202,9 @@ public class neutralization : MonoBehaviour {
         Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, btn[7].transform);
         btn[7].AddInteractionPunch();
 
-        Debug.LogFormat("[Neutralization #{0}] Answered: Base type = {1} (Expected {2}), Drop count = {3} (Expected {4}), Filter enable = {5} (Expected {6})",
-            _moduleId, _baseForm[_selectBase], _baseForm[baseType], _selectVol, baseVol, filterMode, soluType);
+        Debug.LogFormat("[Neutralization #{0}] Answered: Base type = {1} (Expected {2})", _moduleId, _baseForm[_selectBase], _baseForm[baseType]);
+        Debug.LogFormat("[Neutralization #{0}] Answered: Drop count = {1} (Expected {2})", _moduleId, _selectVol, baseVol);
+        Debug.LogFormat("[Neutralization #{0}] Answered: Filter enable = {1} (Expected {2})", _moduleId, filterMode, soluType);
 
         if (_selectBase == baseType && _selectVol == baseVol && filterMode == soluType)
         {
