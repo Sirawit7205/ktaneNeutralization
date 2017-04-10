@@ -2995,7 +2995,7 @@ TextMesh:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1000011750813566}
-  m_Text: NH3
+  m_Text: "NH\u2083"
   m_OffsetZ: 0
   m_CharacterSize: 1
   m_LineSpacing: 1

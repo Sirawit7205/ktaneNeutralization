@@ -82,20 +82,19 @@
             <p>The concentration of the acid can be determined via the following process:
             <ul>
                 <li>Start with the atomic number of the anion of the acid.</li>
-                <li>If the acid's anion or base's cation has a vowel in the chemical symbol, multiply by 2.</li>
-                <li>Add the volume of acid in the tube divided by 5.</li>
-                <li>Subtract the atomic number of the cation of the base.</li>
-                <li>Take the least significant digit of the result.</li>
-                <li>If the number is odd, subtract 1.</li>
-                <li>If the number is 0, add 6.</li>
-                <li>Divide by 10. This is the concentration of the acid.</li>
+				<li>Subtract the atomic number of the cation of the base.</li>
+				<li>If the anion or cation has a vowel in the chemical symbol, subtract 4.</li>
+				<li>If the anion and cation's chemical symbols have the same number of characters, multiply by 3.</li>
+				<li>Take the least significant digit of the result (removing negative signs).</li>
+				<li>If the number is 0, the number becomes the volume of acid doubled then divided by 5.</li>
+				<li>Divide by 10. This is the concentration of the acid.</li>
             </ul>
             <p>The concentration of the base can be determined via the following ruleset:
             <ul>
                 <li>If there are more battery holders than port types or indicators, the concentration is 5.</li>
                 <li>If there are more port types than battery holders or indicators, the concentration is 10.</li>
                 <li>If there are more indicators than battery holders or port types, the concentration is 20.</li>
-                <li>If there are any ties for greatest number of holders, indicators, or port types, the concentration is 5.</li>
+                <li>If there are any ties for the most, the concentration is either 5, 10, and 20, whichever is closest to the cation's atomic number.</li>
                 <li>However, if the titration combination is HI and KOH or HCl and NH<sub>3</sub>, the concentration is always 20.</li>
             </ul>
             <h3>Determining Drop Count</h3>

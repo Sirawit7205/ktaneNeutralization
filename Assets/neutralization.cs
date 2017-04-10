@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using KMHelper;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 public class neutralization : MonoBehaviour {
 
@@ -15,7 +16,7 @@ public class neutralization : MonoBehaviour {
     public GameObject liquidControl;
     public TextMesh[] Text;
 
-    private string[] _acidForm = { "HF", "HCl", "HBr", "HI" }, _baseForm = { "NH3", "LiOH", "NaOH", "KOH" };
+    private string[] _acidForm = { "HF", "HCl", "HBr", "HI" }, _baseForm = { "NH3", "LiOH", "NaOH", "KOH" }, _dispForm = { "NH\u2083", "LiOH", "NaOH", "KOH" };
     private int _selectBase = 0, _selectVol = 0, acidVol, acidType, acidConc, baseVol, baseType, baseConc;
     private bool filterMode = false, soluType;
     private bool[,] solubility = new bool[4, 4] {
@@ -122,21 +123,23 @@ public class neutralization : MonoBehaviour {
 
     void prepareConc()
     {
-        int[] anion = { 9, 17, 35, 53 }, cation = { 1, 3, 11, 19 };
-        bool[] acidV = { false, false, false, true }, baseV = { false, true, true, false };
+        int[] anion = { 9, 17, 35, 53 }, cation = { 1, 3, 11, 19 }, len = { 1, 2, 2, 1 };
         int bh = Info.GetBatteryHolderCount(), port = Info.GetPorts().Distinct().Count(), indc = Info.GetIndicators().Count();
 
         acidConc = anion[acidType];
-        if (acidV[acidType] || baseV[baseType]) acidConc *= 2;
-        acidConc += (acidVol / 5) - cation[baseType];
+        acidConc -= cation[baseType];
+        if (acidType == 3 || baseType == 1 || baseType == 2) acidConc -= 4;
+        if (len[acidType] == len[baseType]) acidConc *= 3;
+        if (acidConc <= 0) acidConc *= -1;
         acidConc %= 10;
-        if (acidConc % 2 == 1) acidConc--;
-        if (acidConc == 0) acidConc = 6;
+        if (acidConc == 0) acidConc = (acidVol * 2) / 5;
 
         if ((acidType == 3 && baseType == 3) || (acidType == 1 && baseType == 0)) baseConc = 20;
         else if (bh > port && bh > indc) baseConc = 5;
         else if (port > bh && port > indc) baseConc = 10;
         else if (indc > bh && indc > port) baseConc = 20;
+        else if (baseType == 2) baseConc = 10;
+        else if (baseType == 3) baseConc = 20;
         else baseConc = 5;
     }
 
@@ -155,7 +158,7 @@ public class neutralization : MonoBehaviour {
             _selectBase++;
             if (_selectBase > 3) _selectBase = 0;
         }
-        Text[0].text = _baseForm[_selectBase];
+        Text[0].text = _dispForm[_selectBase];
     }
 
     void baseConcAdjust(int m)
@@ -219,5 +222,47 @@ public class neutralization : MonoBehaviour {
             Audio.PlaySoundAtTransform("strike", Module.transform);
             Module.HandleStrike();
         }
+    }
+
+    KMSelectable[] ProcessTwitchCommand(string command)
+    {
+        int temp;
+        KMSelectable[] cmdA, cmdB;
+
+        command = command.ToLowerInvariant().Trim();
+
+        if (command.Equals("base prev")) return new[] { btn[0] };
+        else if (command.Equals("base next")) return new[] { btn[1] };
+        else if (command.Equals("filter") || command.Equals("toggle")) return new[] { btn[6] };
+        else if (command.Equals("titrate") || command.Equals("submit")) return new[] { btn[7] };
+        
+        if(Regex.IsMatch(command, @"^conc set \d\d$"))
+        {
+            command = command.Substring(9);
+            temp = int.Parse(command) - _selectVol;
+            if (temp > -10 && temp < 0) command = "conc var -0" + (temp * -1).ToString();
+            else if (temp > -1 && temp < 10) command = "conc var 0" + temp.ToString();
+            else command = "conc var " + temp.ToString();
+        }
+
+        if(Regex.IsMatch(command, @"^conc var \d\d$"))
+        {
+            command = command.Substring(9);
+            temp = int.Parse(command);
+            cmdA = Enumerable.Repeat(btn[2], temp / 10).ToArray();
+            cmdB = Enumerable.Repeat(btn[3], temp % 10).ToArray();
+            return cmdA.Concat(cmdB).ToArray();
+        }
+
+        if(Regex.IsMatch(command, @"^conc var -\d\d$"))
+        {
+            command = command.Substring(10);
+            temp = int.Parse(command);
+            cmdA = Enumerable.Repeat(btn[4], temp / 10).ToArray();
+            cmdB = Enumerable.Repeat(btn[5], temp % 10).ToArray();
+            return cmdA.Concat(cmdB).ToArray();
+        }
+
+        return null;
     }
 }
