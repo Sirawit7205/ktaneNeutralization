@@ -16,9 +16,9 @@ public class neutralization : MonoBehaviour {
     public GameObject liquidControl;
     public TextMesh[] Text;
 
-    private string[] _acidForm = { "HF", "HCl", "HBr", "HI" }, _baseForm = { "NH3", "LiOH", "NaOH", "KOH" }, _dispForm = { "NH\u2083", "LiOH", "NaOH", "KOH" };
+    private string[] _acidForm = { "HF", "HCl", "HBr", "HI" }, _baseForm = { "NH3", "LiOH", "NaOH", "KOH" }, _dispForm = { "NH\u2083", "LiOH", "NaOH", "KOH" }, clrName = { "Yellow", "Green", "Red", "Blue" };
     private int _selectBase = 0, _selectVol = 0, acidVol, acidType, acidConc, baseVol, baseType, baseConc;
-    private bool filterMode = false, soluType;
+    private bool filterMode = false, soluType, _isSolved = false, _lightsOn = false;
     private bool[,] solubility = new bool[4, 4] {
         {true,true,false,false},
         {true,false,true,true},
@@ -77,25 +77,27 @@ public class neutralization : MonoBehaviour {
 
     void Init()
     {
-        string[] clrName = { "Yellow", "Green", "Red", "Blue" };
-
+        Debug.LogFormat("[Neutralization #{0}] Begin detailed calculation report:", _moduleId);
+        Debug.LogFormat("[Neutralization #{0}] Note: 'anion' = Acid's anion and 'cation' = Base's cation.", _moduleId);
         prepareAcid();
         prepareBase();
         prepareConc();
+        Debug.LogFormat("[Neutralization #{0}] End detailed calculation report.", _moduleId);
 
-        baseVol = 20 / baseConc;
-        baseVol *= (acidVol * acidConc) / 10;
-        soluType = solubility[acidType,baseType];
-
-        Debug.LogFormat("[Neutralization #{0}] Acid color: {1}, Acid type: {2}, Acid vol: {3}, Acid conc: {4}", _moduleId, clrName[acidType],_acidForm[acidType], acidVol, acidConc / 10f);
+        Debug.LogFormat("[Neutralization #{0}] Acid color: {1}, Acid type: {2}, Acid vol: {3}, Acid conc: {4}", _moduleId, clrName[acidType], _acidForm[acidType], acidVol, acidConc / 10f);
         Debug.LogFormat("[Neutralization #{0}] Base type: {1}, Base conc: {2}", _moduleId, _baseForm[baseType], baseConc);
         Debug.LogFormat("[Neutralization #{0}] Drop count: {1}, Filter enable: {2}", _moduleId, baseVol, soluType);
+
+        _lightsOn = true;
     }
 
     void prepareAcid()
     {
         acidType = Random.Range(0, 4);
         acidVol = Random.Range(1, 5) * 5;
+
+        Debug.LogFormat("[Neutralization #{0}] >Report A: Acid preparation", _moduleId);
+        Debug.LogFormat("[Neutralization #{0}] A:\\>Acid type is {1} which has {2} color and volume of {3}.", _moduleId, _acidForm[acidType], clrName[acidType], acidVol);
 
         if (acidType == 0) liquid.GetComponent<MeshRenderer>().material.color = Color.yellow;
         else if (acidType == 1) liquid.GetComponent<MeshRenderer>().material.color = Color.green;
@@ -112,13 +114,43 @@ public class neutralization : MonoBehaviour {
     {
         string temp = string.Join("", Info.GetIndicators().ToArray());
 
-        if (Info.IsIndicatorPresent(KMBombInfoExtensions.KnownIndicatorLabel.NSA) && Info.GetBatteryCount() == 3) baseType = 0;
-        else if (Info.IsIndicatorOn(KMBombInfoExtensions.KnownIndicatorLabel.CAR) || Info.IsIndicatorOn(KMBombInfoExtensions.KnownIndicatorLabel.FRQ) || Info.IsIndicatorOn(KMBombInfoExtensions.KnownIndicatorLabel.IND)) baseType = 3;
-        else if (Info.GetPortCount() == 0 && Info.GetSerialNumberLetters().Any("AEIOU".Contains)) baseType = 1;
-        else if (temp.Any(_acidForm[acidType].ToUpper().Contains)) baseType = 3;
-        else if (Info.GetBatteryCount(KMBombInfoExtensions.KnownBatteryType.D) > Info.GetBatteryCount(KMBombInfoExtensions.KnownBatteryType.AA)) baseType = 0;
-        else if (acidType == 0 || acidType == 1) baseType = 2;
-        else baseType = 1;
+        Debug.LogFormat("[Neutralization #{0}] >Report B: Base preparation", _moduleId);
+
+        if (Info.IsIndicatorPresent(KMBombInfoExtensions.KnownIndicatorLabel.NSA) && Info.GetBatteryCount() == 3)
+        {
+            baseType = 0;
+            Debug.LogFormat("[Neutralization #{0}] B:\\>NSA and 3 batt: {1}", _moduleId, _baseForm[baseType]);
+        }
+        else if (Info.IsIndicatorOn(KMBombInfoExtensions.KnownIndicatorLabel.CAR) || Info.IsIndicatorOn(KMBombInfoExtensions.KnownIndicatorLabel.FRQ) || Info.IsIndicatorOn(KMBombInfoExtensions.KnownIndicatorLabel.IND))
+        {
+            baseType = 3;
+            Debug.LogFormat("[Neutralization #{0}] B:\\>CAR, FRQ, or IND: {1}", _moduleId, _baseForm[baseType]);
+        }
+        else if (Info.GetPortCount() == 0 && Info.GetSerialNumberLetters().Any("AEIOU".Contains))
+        {
+            baseType = 1;
+            Debug.LogFormat("[Neutralization #{0}] B:\\>No ports and vowel in S/N: {1}", _moduleId, _baseForm[baseType]);
+        }
+        else if (temp.Any(_acidForm[acidType].ToUpper().Contains))
+        {
+            baseType = 3;
+            Debug.LogFormat("[Neutralization #{0}] B:\\>Acid formular has letter in common with an indicator: {1}", _moduleId, _baseForm[baseType]);
+        }
+        else if (Info.GetBatteryCount(KMBombInfoExtensions.KnownBatteryType.D) > Info.GetBatteryCount(KMBombInfoExtensions.KnownBatteryType.AA))
+        {
+            baseType = 0;
+            Debug.LogFormat("[Neutralization #{0}] B:\\>D batt > AA batt: {1}", _moduleId, _baseForm[baseType]);
+        }
+        else if (acidType == 0 || acidType == 1)
+        {
+            baseType = 2;
+            Debug.LogFormat("[Neutralization #{0}] B:\\>Anion < 20: {1}", _moduleId, _baseForm[baseType]);
+        }
+        else
+        {
+            baseType = 1;
+            Debug.LogFormat("[Neutralization #{0}] B:\\>Otherwise: {1}", _moduleId, _baseForm[baseType]);
+        }
     }
 
     void prepareConc()
@@ -126,27 +158,90 @@ public class neutralization : MonoBehaviour {
         int[] anion = { 9, 17, 35, 53 }, cation = { 1, 3, 11, 19 }, len = { 1, 2, 2, 1 };
         int bh = Info.GetBatteryHolderCount(), port = Info.GetPorts().Distinct().Count(), indc = Info.GetIndicators().Count();
 
-        acidConc = anion[acidType];
-        acidConc -= cation[baseType];
-        if (acidType == 3 || baseType == 1 || baseType == 2) acidConc -= 4;
-        if (len[acidType] == len[baseType]) acidConc *= 3;
-        if (acidConc <= 0) acidConc *= -1;
-        acidConc %= 10;
-        if (acidConc == 0) acidConc = (acidVol * 2) / 5;
+        Debug.LogFormat("[Neutralization #{0}] >Report C: Concentration calculation", _moduleId);
 
-        if ((acidType == 3 && baseType == 3) || (acidType == 1 && baseType == 0)) baseConc = 20;
-        else if (bh > port && bh > indc) baseConc = 5;
-        else if (port > bh && port > indc) baseConc = 10;
-        else if (indc > bh && indc > port) baseConc = 20;
-        else if (baseType == 2) baseConc = 10;
-        else if (baseType == 3) baseConc = 20;
-        else baseConc = 5;
+        //acid
+        acidConc = anion[acidType];
+        Debug.LogFormat("[Neutralization #{0}] C:\\acid>Starts with anion: {1} [current = {2}]", _moduleId, anion[acidType], acidConc);
+        acidConc -= cation[baseType];
+        Debug.LogFormat("[Neutralization #{0}] C:\\acid>Sub with cation: -{1} [current = {2}]", _moduleId, cation[baseType], acidConc);
+        if (acidType == 3 || baseType == 1 || baseType == 2)
+        {
+            acidConc -= 4;
+            Debug.LogFormat("[Neutralization #{0}] C:\\acid>Anion/Cation contains vowels: -4 [current = {1}]", _moduleId, acidConc);
+        }
+        if (len[acidType] == len[baseType])
+        {
+            acidConc *= 3;
+            Debug.LogFormat("[Neutralization #{0}] C:\\acid>Length of anion = cation: x3 [current = {1}]", _moduleId, acidConc);
+        }
+        if (acidConc <= 0)
+        {
+            acidConc *= -1;
+            Debug.LogFormat("[Neutralization #{0}] C:\\acid>Negative adjust [current = {1}]", _moduleId, acidConc);
+        }
+        acidConc %= 10;
+        Debug.LogFormat("[Neutralization #{0}] C:\\acid>Take LSD: {1}", _moduleId, acidConc);
+        if (acidConc == 0)
+        {
+            acidConc = (acidVol * 2) / 5;
+            Debug.LogFormat("[Neutralization #{0}] C:\\acid>LSD is 0, use (Acid vol x2)/5: {1}", _moduleId, acidConc);
+        }
+        Debug.LogFormat("[Neutralization #{0}] C:\\acid>Final acid conc = {1}", _moduleId, acidConc / 10f);
+
+        //base
+        if ((acidType == 3 && baseType == 3) || (acidType == 1 && baseType == 0))
+        {
+            baseConc = 20;
+            Debug.LogFormat("[Neutralization #{0}] C:\\base>Special pair, use constant conc. 20", _moduleId);
+        }
+        else if (bh > port && bh > indc)
+        {
+            baseConc = 5;
+            Debug.LogFormat("[Neutralization #{0}] C:\\base>Battery holders win, use conc. 5", _moduleId);
+        }
+        else if (port > bh && port > indc)
+        {
+            baseConc = 10;
+            Debug.LogFormat("[Neutralization #{0}] C:\\base>Port types win, use conc. 10", _moduleId);
+        }
+        else if (indc > bh && indc > port)
+        {
+            baseConc = 20;
+            Debug.LogFormat("[Neutralization #{0}] C:\\base>Indicators win, use conc. 20", _moduleId);
+        }
+        else if (baseType == 2)
+        {
+            baseConc = 10;
+            Debug.LogFormat("[Neutralization #{0}] C:\\base>Tie, use 10 because it's closest to 11", _moduleId);
+        }
+        else if (baseType == 3)
+        {
+            baseConc = 20;
+            Debug.LogFormat("[Neutralization #{0}] C:\\base>Tie, use 20 because it's closest to 19", _moduleId);
+        }
+        else
+        {
+            baseConc = 5;
+            Debug.LogFormat("[Neutralization #{0}] C:\\base>Tie, use 5 because it's closest to 1 or 3", _moduleId);
+        }
+
+        //drop cnt & solu
+        baseVol = 20 / baseConc;
+        Debug.LogFormat("[Neutralization #{0}] C:\\drop>Starts with 20 / Base conc. {1} = {2}", _moduleId, baseConc, baseVol);
+        baseVol *= (acidVol * acidConc) / 10;
+        Debug.LogFormat("[Neutralization #{0}] C:\\drop>Then mult with Acid vol {1} and Acid conc. {2} = {3}", _moduleId, acidVol, acidConc / 10f, baseVol);
+        Debug.LogFormat("[Neutralization #{0}] C:\\drop>Final drop count is {1}", _moduleId, baseVol);
+        soluType = solubility[acidType, baseType];
+        if(soluType == true) Debug.LogFormat("[Neutralization #{0}] C:\\solu>Pair of {1} and {2} is not soluble, turn filter on.", _moduleId, _acidForm[acidType], _baseForm[baseType]);
+        else Debug.LogFormat("[Neutralization #{0}] C:\\solu>Pair of {1} and {2} is soluble, turn filter off.", _moduleId, _acidForm[acidType], _baseForm[baseType]);
     }
 
     void baseTypeAdjust(int m)
     {
         Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, btn[m].transform);
         btn[m].AddInteractionPunch();
+        if (!_lightsOn || _isSolved) return;
 
         if (m == 0)
         {
@@ -167,6 +262,7 @@ public class neutralization : MonoBehaviour {
 
         Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, btn[m + 2].transform);
         btn[m + 2].AddInteractionPunch();
+        if (!_lightsOn || _isSolved) return;
 
         if (m == 0) _selectVol += 10;
         else if (m == 1) _selectVol++;
@@ -185,6 +281,7 @@ public class neutralization : MonoBehaviour {
     {
         Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, btn[6].transform);
         btn[6].AddInteractionPunch();
+        if (!_lightsOn || _isSolved) return;
 
         if (filterMode == false)
         {
@@ -204,6 +301,7 @@ public class neutralization : MonoBehaviour {
     {
         Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, btn[7].transform);
         btn[7].AddInteractionPunch();
+        if (!_lightsOn || _isSolved) return;
 
         Debug.LogFormat("[Neutralization #{0}] Answered: Base type = {1} (Expected {2})", _moduleId, _baseForm[_selectBase], _baseForm[baseType]);
         Debug.LogFormat("[Neutralization #{0}] Answered: Drop count = {1} (Expected {2})", _moduleId, _selectVol, baseVol);
@@ -215,6 +313,7 @@ public class neutralization : MonoBehaviour {
             Debug.LogFormat("[Neutralization #{0}] Answer correct! Module passed!", _moduleId);
             Audio.PlaySoundAtTransform("correct", Module.transform);
             Module.HandlePass();
+            _isSolved = true;
         }
         else
         {
