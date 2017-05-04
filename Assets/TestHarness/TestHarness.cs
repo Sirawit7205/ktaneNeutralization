@@ -683,7 +683,7 @@ public class TestHarness : MonoBehaviour
         GUILayout.Label("Time remaining: " + fakeInfo.GetFormattedTime());
     }
 
-    private Light light;
+    private new Light light;
 
     public void PrepareLights()
     {
