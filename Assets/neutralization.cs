@@ -334,8 +334,30 @@ public class neutralization : MonoBehaviour {
         else if (command.Equals("base next")) return new[] { btn[1] };
         else if (command.Equals("filter") || command.Equals("toggle")) return new[] { btn[6] };
         else if (command.Equals("titrate") || command.Equals("submit")) return new[] { btn[7] };
-        
-        if(Regex.IsMatch(command, @"^conc set \d\d$"))
+
+        if (Regex.IsMatch(command, @"^base [a-z0-9]+$"))
+        {
+            command = command.Substring(5);
+            int index = System.Array.FindIndex(_baseForm, p => p.Equals(command, System.StringComparison.InvariantCultureIgnoreCase));
+            if ( (index > -1) && (index != _selectBase) )
+            {
+                int distance = index - _selectBase;
+                switch (distance)
+                {
+                    case -1:
+                    case 3:
+                        return new[] { btn[0] };
+                    case -2:
+                    case 2:
+                        return new[] { btn[1], btn[1] };
+                    case -3:
+                    case 1:
+                        return new[] { btn[1] };
+                };
+            }
+        }
+
+        if (Regex.IsMatch(command, @"^conc set \d\d?$"))
         {
             command = command.Substring(9);
             temp = int.Parse(command) - _selectVol;
@@ -344,7 +366,7 @@ public class neutralization : MonoBehaviour {
             else command = "conc var " + temp.ToString();
         }
 
-        if(Regex.IsMatch(command, @"^conc var \d\d$"))
+        if(Regex.IsMatch(command, @"^conc var \d\d?$"))
         {
             command = command.Substring(9);
             temp = int.Parse(command);
@@ -353,7 +375,7 @@ public class neutralization : MonoBehaviour {
             return cmdA.Concat(cmdB).ToArray();
         }
 
-        if(Regex.IsMatch(command, @"^conc var -\d\d$"))
+        if(Regex.IsMatch(command, @"^conc var -\d\d?$"))
         {
             command = command.Substring(10);
             temp = int.Parse(command);
