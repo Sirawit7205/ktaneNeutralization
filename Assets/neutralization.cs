@@ -2,19 +2,27 @@
 using KMHelper;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Newtonsoft.Json;
 
 public class neutralization : MonoBehaviour {
 
-    private static int _moduleIdCounter = 1;
-    private int _moduleId = 0;
+    public class ModSettingsJSON
+    {
+        public bool enableColorblindMode;
+        public string note;
+    }
 
     public KMAudio Audio;
     public KMBombInfo Info;
     public KMBombModule Module;
+    public KMModSettings modSettings;
     public KMSelectable[] btn;
     public MeshRenderer liquid, filterBtn;
-    public GameObject liquidControl;
+    public GameObject liquidControl, colorText;
     public TextMesh[] Text;
+
+    private static int _moduleIdCounter = 1;
+    private int _moduleId = 0;
 
     private string[] _acidForm = { "HF", "HCl", "HBr", "HI" }, _baseForm = { "NH3", "LiOH", "NaOH", "KOH" }, _dispForm = { "NH\u2083", "LiOH", "NaOH", "KOH" }, clrName = { "Yellow", "Green", "Red", "Blue" };
     private int _selectBase = 0, _selectVol = 0, acidVol, acidType, acidConc, baseVol, baseType, baseConc;
@@ -103,6 +111,10 @@ public class neutralization : MonoBehaviour {
         else if (acidType == 1) liquid.GetComponent<MeshRenderer>().material.color = Color.green;
         else if (acidType == 2) liquid.GetComponent<MeshRenderer>().material.color = Color.red;
         else liquid.GetComponent<MeshRenderer>().material.color = Color.blue;
+
+        //colorblind check
+        if (isColorBlind())
+            enableHelperText(acidType);
 
         if(acidVol == 5) liquidControl.gameObject.transform.localScale = new Vector3(22.22222f, 50, 1.43f);
         else if(acidVol == 10) liquidControl.gameObject.transform.localScale = new Vector3(22.22222f, 50, 3.73f);
@@ -235,6 +247,34 @@ public class neutralization : MonoBehaviour {
         soluType = solubility[acidType, baseType];
         if(soluType == true) Debug.LogFormat("[Neutralization #{0}] C:\\solu>Pair of {1} and {2} is not soluble, turn filter on.", _moduleId, _acidForm[acidType], _baseForm[baseType]);
         else Debug.LogFormat("[Neutralization #{0}] C:\\solu>Pair of {1} and {2} is soluble, turn filter off.", _moduleId, _acidForm[acidType], _baseForm[baseType]);
+    }
+
+    bool isColorBlind()
+    {
+        try
+        {
+            ModSettingsJSON settings = JsonConvert.DeserializeObject<ModSettingsJSON>(modSettings.Settings);
+            if (settings != null)
+                return settings.enableColorblindMode;
+            else
+                return false;
+        }
+        catch(JsonReaderException e)
+        {
+            Debug.LogFormat("[Neutralization #{0}] JSON reading failed with error {1}, assuming colorblind mode is disabled.", _moduleId, e.Message);
+            return false;
+        }
+    }
+
+    void enableHelperText(int acidType)
+    {
+        if (acidType == 0) colorText.GetComponent<TextMesh>().text = "Yellow";
+        else if (acidType == 1) colorText.GetComponent<TextMesh>().text = "Green";
+        else if (acidType == 2) colorText.GetComponent<TextMesh>().text = "Red";
+        else colorText.GetComponent<TextMesh>().text = "Blue";
+
+        Debug.LogFormat("[Neutralization #{0}] A:\\>Colorblind mode enabled, showing color of acid in text.", _moduleId);
+        colorText.SetActive(true);
     }
 
     void baseTypeAdjust(int m)
