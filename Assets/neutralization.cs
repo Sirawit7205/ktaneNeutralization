@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 
-public class neutralization : MonoBehaviour {
+public class Neutralization : MonoBehaviour {
 
     public class ModSettingsJSON
     {
@@ -24,10 +24,10 @@ public class neutralization : MonoBehaviour {
     private static int _moduleIdCounter = 1;
     private int _moduleId = 0;
 
-    private string[] _acidForm = { "HF", "HCl", "HBr", "HI" }, _baseForm = { "NH3", "LiOH", "NaOH", "KOH" }, _dispForm = { "NH\u2083", "LiOH", "NaOH", "KOH" }, clrName = { "Yellow", "Green", "Red", "Blue" };
+    private readonly string[] _acidForm = { "HF", "HCl", "HBr", "HI" }, _baseForm = { "NH3", "LiOH", "NaOH", "KOH" }, _dispForm = { "NH\u2083", "LiOH", "NaOH", "KOH" }, clrName = { "Yellow", "Green", "Red", "Blue" };
     private int _selectBase = 0, _selectVol = 0, acidVol, acidType, acidConc, baseVol, baseType, baseConc;
     private bool filterMode = false, soluType, _isSolved = false, _lightsOn = false;
-    private bool[,] solubility = new bool[4, 4] {
+    private readonly bool[,] solubility = new bool[4, 4] {
         {true,true,false,false},
         {true,false,true,true},
         {false,true,false,true},
@@ -43,42 +43,42 @@ public class neutralization : MonoBehaviour {
     {
         btn[0].OnInteract += delegate ()
          {
-             baseTypeAdjust(0);
+             BaseTypeAdjust(0);
              return false;
          };
         btn[1].OnInteract += delegate ()
         {
-            baseTypeAdjust(1);
+            BaseTypeAdjust(1);
             return false;
         };
         btn[2].OnInteract += delegate ()
         {
-            baseConcAdjust(0);
+            BaseConcAdjust(0);
             return false;
         };
         btn[3].OnInteract += delegate ()
         {
-            baseConcAdjust(1);
+            BaseConcAdjust(1);
             return false;
         };
         btn[4].OnInteract += delegate ()
         {
-            baseConcAdjust(2);
+            BaseConcAdjust(2);
             return false;
         };
         btn[5].OnInteract += delegate ()
         {
-            baseConcAdjust(3);
+            BaseConcAdjust(3);
             return false;
         };
         btn[6].OnInteract += delegate ()
         {
-            filterModeTog();
+            FilterModeTog();
             return false;
         };
         btn[7].OnInteract += delegate ()
         {
-            ansChk();
+            AnsChk();
             return false;
         };
     }
@@ -87,9 +87,9 @@ public class neutralization : MonoBehaviour {
     {
         Debug.LogFormat("[Neutralization #{0}] Begin detailed calculation report:", _moduleId);
         Debug.LogFormat("[Neutralization #{0}] Note: 'anion' = Acid's anion and 'cation' = Base's cation.", _moduleId);
-        prepareAcid();
-        prepareBase();
-        prepareConc();
+        PrepareAcid();
+        PrepareBase();
+        PrepareConc();
         Debug.LogFormat("[Neutralization #{0}] End detailed calculation report.", _moduleId);
 
         Debug.LogFormat("[Neutralization #{0}] Acid color: {1}, Acid type: {2}, Acid vol: {3}, Acid conc: {4}", _moduleId, clrName[acidType], _acidForm[acidType], acidVol, acidConc / 10f);
@@ -99,7 +99,7 @@ public class neutralization : MonoBehaviour {
         _lightsOn = true;
     }
 
-    void prepareAcid()
+    void PrepareAcid()
     {
         acidType = Random.Range(0, 4);
         acidVol = Random.Range(1, 5) * 5;
@@ -113,8 +113,8 @@ public class neutralization : MonoBehaviour {
         else liquid.GetComponent<MeshRenderer>().material.color = Color.blue;
 
         //colorblind check
-        if (isColorBlind())
-            enableHelperText(acidType);
+        if (IsColorBlind())
+            EnableHelperText(acidType);
 
         if(acidVol == 5) liquidControl.gameObject.transform.localScale = new Vector3(22.22222f, 50, 1.43f);
         else if(acidVol == 10) liquidControl.gameObject.transform.localScale = new Vector3(22.22222f, 50, 3.73f);
@@ -122,7 +122,7 @@ public class neutralization : MonoBehaviour {
         else liquidControl.gameObject.transform.localScale = new Vector3(22.22222f, 50, 8.44f);
     }
 
-    void prepareBase()
+    void PrepareBase()
     {
         string temp = string.Join("", Info.GetIndicators().ToArray());
 
@@ -165,7 +165,7 @@ public class neutralization : MonoBehaviour {
         }
     }
 
-    void prepareConc()
+    void PrepareConc()
     {
         int[] anion = { 9, 17, 35, 53 }, cation = { 1, 3, 11, 19 }, len = { 1, 2, 2, 1 };
         int bh = Info.GetBatteryHolderCount(), port = Info.GetPorts().Distinct().Count(), indc = Info.GetIndicators().Count();
@@ -249,7 +249,7 @@ public class neutralization : MonoBehaviour {
         else Debug.LogFormat("[Neutralization #{0}] C:\\solu>Pair of {1} and {2} is soluble, turn filter off.", _moduleId, _acidForm[acidType], _baseForm[baseType]);
     }
 
-    bool isColorBlind()
+    bool IsColorBlind()
     {
         try
         {
@@ -266,7 +266,7 @@ public class neutralization : MonoBehaviour {
         }
     }
 
-    void enableHelperText(int acidType)
+    void EnableHelperText(int acidType)
     {
         if (acidType == 0) colorText.GetComponent<TextMesh>().text = "Yellow";
         else if (acidType == 1) colorText.GetComponent<TextMesh>().text = "Green";
@@ -277,7 +277,7 @@ public class neutralization : MonoBehaviour {
         colorText.SetActive(true);
     }
 
-    void baseTypeAdjust(int m)
+    void BaseTypeAdjust(int m)
     {
         Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, btn[m].transform);
         btn[m].AddInteractionPunch();
@@ -296,7 +296,7 @@ public class neutralization : MonoBehaviour {
         Text[0].text = _dispForm[_selectBase];
     }
 
-    void baseConcAdjust(int m)
+    void BaseConcAdjust(int m)
     {
         string temp = "";
 
@@ -317,7 +317,7 @@ public class neutralization : MonoBehaviour {
         Text[1].text = temp;
     }
 
-    void filterModeTog()
+    void FilterModeTog()
     {
         Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, btn[6].transform);
         btn[6].AddInteractionPunch();
@@ -337,7 +337,7 @@ public class neutralization : MonoBehaviour {
         }
     }
 
-    void ansChk()
+    void AnsChk()
     {
         Audio.PlayGameSoundAtTransform(KMSoundOverride.SoundEffect.ButtonPress, btn[7].transform);
         btn[7].AddInteractionPunch();
