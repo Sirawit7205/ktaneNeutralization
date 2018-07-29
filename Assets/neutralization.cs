@@ -363,6 +363,12 @@ public class Neutralization : MonoBehaviour {
         }
     }
 
+#pragma warning disable 414
+    private readonly string TwitchHelpMessage = @"Set the base with “!{0} base prev 1” (press the < button 1 time) or “!{0} base next 2” (press the > button 2 times) or “!{0} base NaOH” (direct).
+                                                    Set the concentration to 55 with “!{0} conc set 55”. Add or subtract the concentration with “!{0} conc var (num, negative allowed)”.
+                                                    Toggle the filter with “!{0} filter”. Submit the answer with “!{0} titrate”.";
+#pragma warning restore 414
+
     KMSelectable[] ProcessTwitchCommand(string command)
     {
         int temp;
