@@ -1,21 +1,13 @@
 ﻿using UnityEngine;
-using KMHelper;
+using KModkit;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json;
 
 public class Neutralization : MonoBehaviour {
-
-    public class ModSettingsJSON
-    {
-        public bool enableColorblindMode;
-        public string note;
-    }
 
     public KMAudio Audio;
     public KMBombInfo Info;
     public KMBombModule Module;
-    public KMModSettings modSettings;
     public KMSelectable[] btn;
     public MeshRenderer liquid, filterBtn;
     public GameObject liquidControl, colorText;
@@ -113,7 +105,7 @@ public class Neutralization : MonoBehaviour {
         else liquid.GetComponent<MeshRenderer>().material.color = Color.blue;
 
         //colorblind check
-        if (IsColorBlind())
+        if (GetComponent<KMColorblindMode>().ColorblindModeActive)
             EnableHelperText(acidType);
 
         if(acidVol == 5) liquidControl.gameObject.transform.localScale = new Vector3(22.22222f, 50, 1.43f);
@@ -128,12 +120,12 @@ public class Neutralization : MonoBehaviour {
 
         Debug.LogFormat("[Neutralization #{0}] >Report B: Base preparation", _moduleId);
 
-        if (Info.IsIndicatorPresent(KMBombInfoExtensions.KnownIndicatorLabel.NSA) && Info.GetBatteryCount() == 3)
+        if (Info.IsIndicatorPresent(Indicator.NSA) && Info.GetBatteryCount() == 3)
         {
             baseType = 0;
             Debug.LogFormat("[Neutralization #{0}] B:\\>NSA and 3 batt: {1}", _moduleId, _baseForm[baseType]);
         }
-        else if (Info.IsIndicatorOn(KMBombInfoExtensions.KnownIndicatorLabel.CAR) || Info.IsIndicatorOn(KMBombInfoExtensions.KnownIndicatorLabel.FRQ) || Info.IsIndicatorOn(KMBombInfoExtensions.KnownIndicatorLabel.IND))
+        else if (Info.IsIndicatorOn(Indicator.CAR) || Info.IsIndicatorOn(Indicator.FRQ) || Info.IsIndicatorOn(Indicator.IND))
         {
             baseType = 3;
             Debug.LogFormat("[Neutralization #{0}] B:\\>CAR, FRQ, or IND: {1}", _moduleId, _baseForm[baseType]);
@@ -148,7 +140,7 @@ public class Neutralization : MonoBehaviour {
             baseType = 3;
             Debug.LogFormat("[Neutralization #{0}] B:\\>Acid formular has letter in common with an indicator: {1}", _moduleId, _baseForm[baseType]);
         }
-        else if (Info.GetBatteryCount(KMBombInfoExtensions.KnownBatteryType.D) > Info.GetBatteryCount(KMBombInfoExtensions.KnownBatteryType.AA))
+        else if (Info.GetBatteryCount(Battery.D) > Info.GetBatteryCount(Battery.AA))
         {
             baseType = 0;
             Debug.LogFormat("[Neutralization #{0}] B:\\>D batt > AA batt: {1}", _moduleId, _baseForm[baseType]);
@@ -247,23 +239,6 @@ public class Neutralization : MonoBehaviour {
         soluType = solubility[acidType, baseType];
         if(soluType == true) Debug.LogFormat("[Neutralization #{0}] C:\\solu>Pair of {1} and {2} is not soluble, turn filter on.", _moduleId, _acidForm[acidType], _baseForm[baseType]);
         else Debug.LogFormat("[Neutralization #{0}] C:\\solu>Pair of {1} and {2} is soluble, turn filter off.", _moduleId, _acidForm[acidType], _baseForm[baseType]);
-    }
-
-    bool IsColorBlind()
-    {
-        try
-        {
-            ModSettingsJSON settings = JsonConvert.DeserializeObject<ModSettingsJSON>(modSettings.Settings);
-            if (settings != null)
-                return settings.enableColorblindMode;
-            else
-                return false;
-        }
-        catch(JsonReaderException e)
-        {
-            Debug.LogFormat("[Neutralization #{0}] JSON reading failed with error {1}, assuming colorblind mode is disabled.", _moduleId, e.Message);
-            return false;
-        }
     }
 
     void EnableHelperText(int acidType)

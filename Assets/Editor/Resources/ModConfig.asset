@@ -15,7 +15,8 @@ MonoBehaviour:
   title: Neutralization
   description: "The rules are simple: neutralize or be neutralized.\r\n\r\nModule
     idea by Nanthelas.\r\n\r\nModule ID: neutralization \r\n\r\nManual HTML: https://ktane.timwi.de/HTML/Neutralization.html\r\nManual
-    PDF: https://ktane.timwi.de/PDF/Neutralization.pdf\r\n\r\nSound from: http://www.freesfx.co.uk\n\nThe
+    PDF: https://ktane.timwi.de/PDF/Neutralization.pdf\r\n\nThis module has a colorblind
+    mode. The color of the acid will be shown in text.\n\r\nSound from: http://www.freesfx.co.uk\n\nThe
     Inconsolata font is licensed under the SIL Open Font License, Version 1.1."
   version: 2.0
   outputFolder: build

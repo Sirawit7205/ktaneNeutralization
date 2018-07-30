@@ -646,7 +646,7 @@ GameObject:
   - component: {fileID: 114000010933367794}
   - component: {fileID: 114000012168182446}
   - component: {fileID: 114000014044113674}
-  - component: {fileID: 114645215907497854}
+  - component: {fileID: 114994374221012124}
   m_Layer: 0
   m_Name: neutralization
   m_TagString: Untagged
@@ -3717,7 +3717,6 @@ MonoBehaviour:
   Audio: {fileID: 114000012477396680}
   Info: {fileID: 114000011014799372}
   Module: {fileID: 114000010933367794}
-  modSettings: {fileID: 114645215907497854}
   btn:
   - {fileID: 114000010876519674}
   - {fileID: 114000013011950872}
@@ -3809,7 +3808,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ShaderNames:
   - GUI/KT 3D Text
---- !u!114 &114645215907497854
+--- !u!114 &114994374221012124
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -3817,9 +3816,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1000013201011712}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -289456416, guid: 45b809be76fd7a3468b6f517bced6f28, type: 3}
+  m_Script: {fileID: 11500000, guid: c1cfb889a07d5fd4e9baed7960bb397f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Settings: "{ \t \t \t\"enableColorblindMode\": false, \t\"note\": \"Set enableColorblindMode
-    to true to enable text helpers on the module.\" }"
-  SettingsPath: 
+  _colorblindMode: 0
