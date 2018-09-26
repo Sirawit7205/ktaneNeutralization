@@ -140,7 +140,7 @@ public class Neutralization : MonoBehaviour {
             baseType = 3;
             Debug.LogFormat("[Neutralization #{0}] B:\\>Acid formular has letter in common with an indicator: {1}", _moduleId, _baseForm[baseType]);
         }
-        else if (Info.GetBatteryCount(Battery.D) > Info.GetBatteryCount(Battery.AA))
+        else if (Info.GetBatteryCount(Battery.D) > (Info.GetBatteryCount(Battery.AA) + Info.GetBatteryCount(Battery.AAx3) + Info.GetBatteryCount(Battery.AAx4)))
         {
             baseType = 0;
             Debug.LogFormat("[Neutralization #{0}] B:\\>D batt > AA batt: {1}", _moduleId, _baseForm[baseType]);
