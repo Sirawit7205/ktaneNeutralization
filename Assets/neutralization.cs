@@ -3,7 +3,7 @@ using KModkit;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-public class Neutralization : MonoBehaviour {
+public class neutralization : MonoBehaviour {
 
     public KMAudio Audio;
     public KMBombInfo Info;
